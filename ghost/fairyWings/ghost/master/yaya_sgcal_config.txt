@@ -1,0 +1,4 @@
+// -*- coding: japanese-shift-jis-dos; mode: C; -*-
+#globaldefine NETWORK_REFRESH_INTERVAL 3 // ネットワーク状態確認インターバル
+
+

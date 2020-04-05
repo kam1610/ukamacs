@@ -1,0 +1,4 @@
+charset,Shift_JIS
+type,ghost
+name,‚Ì‚è‚±‚ÆƒVƒ‹ƒtƒB
+directory,fairyWings

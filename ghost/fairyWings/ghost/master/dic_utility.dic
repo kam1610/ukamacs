@@ -1,0 +1,544 @@
+//以下ゴースト「紺野あやめ」の辞書を元に改変したものです
+//SHIORI3FW.EscapeAllTagsはさくらスクリプトエスケープタグ
+//変数中のさくらスクリプトをバルーン表示時実行してしまうのを防止
+//---------------------------------------------------------
+//インストール
+//---------------------------------------------------------
+
+//インストール中
+OnInstallBegin
+{
+	"\1\s[10]\0\s[0]≪インストール開始≫\e"
+}
+
+//インストール完了
+OnInstallComplete
+{
+	"\1\s[10]\0\s[0]≪インストール完了≫\n\n[half]"
+	--
+	case reference[0] {
+		when 'shell'			; 'シェル'
+		when 'ghost'			; 'ゴースト'
+		when 'balloon'			; 'バルーン'
+		when 'headline'			; 'ヘッドライン'
+		when 'plugin'			; 'プラグイン'
+		when 'supplement'		; 'サプリメント'
+		when 'calendar skin'		; 'カレンダースキン'
+		when 'calendar plugin'		; 'カレンダープラグイン'
+		when 'rss'			; 'RSS'
+		others				; (SHIORI3FW.EscapeAllTags(reference[0]))
+	}
+	--
+	//アーカイブ名
+	"『%(SHIORI3FW.EscapeAllTags(reference[1]))』\n\n"
+	--
+
+	//SSPのみ。インストール直後に使用するかどうかの選択肢（省略可）
+	//起動中本体名取得はbasewarenameex
+	if basewarenameex == 'SSP' && 'ghost' _in_ reference[0] {
+		"■\q[このゴーストと交代,ChangeLastInstalledGhost]\n/
+		■\q[このゴーストを呼ぶ,CallLastInstalledGhost]\n/
+		■\q[Close,InstallCompleteClose]\n"
+	}
+	elseif basewarenameex == 'SSP' && 'shell' _in_ reference[0]  {
+		"■\q[このシェルに変更,ChangeLastInstalledShell]\n/
+		■\q[Close,InstallCompleteClose]\n"
+	}
+	elseif basewarenameex == 'SSP' && reference[0] == 'balloon' {
+		"■\q[このバルーンに変更,ChangeLastInstalledBalloon]\n/
+		■\q[Close,InstallCompleteClose]\n"
+	}
+
+	--
+	"\e"
+}
+
+//最後にインストールしたゴーストへ交代（自ゴースト終了）
+//ここにトークを入れないと無言で交代する
+ChangeLastInstalledGhost
+{
+	"\1\s[10]\0\s[0]\![change,ghost,lastinstalled]\e"
+}
+
+//最後にインストールしたゴーストを呼ぶ
+CallLastInstalledGhost
+{
+	"\1\s[10]\0\s[0]\![call,ghost,lastinstalled]\e"
+}
+
+//最後にインストールしたシェルに変更
+ChangeLastInstalledShell
+{
+	"\1\s[10]\0\s[0]\![change,shell,lastinstalled]\e"
+}
+
+//最後にインストールしたバルーンに変更
+ChangeLastInstalledBalloon
+{
+	"\1\s[10]\0\s[0]\![change,balloon,lastinstalled]\e"
+}
+
+//インストールしたものを使用しない
+InstallCompleteClose
+{
+	"\1\s[10]\b[-1]\0\s[0]\b[-1]\e"
+}
+
+//インストール失敗
+OnInstallFailure
+{
+	"\1\s[10]\0\s[0]≪インストール失敗≫\n\n[half]失敗理由："
+	--
+	case reference[0] {
+		when 'unlha32'			; "unlha32ロード失敗"
+		when 'extraction'		; "アーカイブ破損"
+		when 'invalid type'		; "install.txtが不正"
+		when 'artificial '		; 'ユーザによる中断'
+		when 'unsupported'		; 'サポート外アーカイブ'
+		others				; (SHIORI3FW.EscapeAllTags(reference[0]))
+	}
+	--
+	"\e"
+}
+
+//インストール拒否（他のゴーストのためのアーカイブだった）
+OnInstallRefuse
+{
+	"\1\s[10]\0\s[0]≪『%(SHIORI3FW.EscapeAllTags(reference[0]))』専用アーカイブのためインストール中止≫\e"
+}
+
+//---------------------------------------------------------
+//メールチェック
+//---------------------------------------------------------
+
+//メールチェック開始
+OnBIFFBegin
+{
+	"\1\s[10]\0\s[0]≪新着メールチェック開始≫\n\n[half]/
+	接続先：%(SHIORI3FW.EscapeAllTags(reference[2]))\e"
+}
+
+//メールチェック成功
+OnBIFFComplete
+{
+	if reference[0] == 0
+	{
+		//合計メール数0
+		"\1\s[10]\0\s[0]≪新着メールなし≫\n/
+		メール数合計0通\n\n[half]/
+		接続先：%(SHIORI3FW.EscapeAllTags(reference[2]))\e"
+	}
+	if reference[3] > 0
+	{
+		//新着メールあり
+		"\1\s[10]\0\s[0]≪新着メール%(reference[3])通≫\n/
+		メール数合計%(reference[0])通／%(reference[1])byte\n\n[half]/
+		接続先：%(SHIORI3FW.EscapeAllTags(reference[2]))\n\n/
+		■\q[メーラーを開く,OpenMailer]　/
+		■\q[Cancel,CancelOpenMailer]\e"
+	}
+	else
+	{
+		//新着メールなし
+		"\1\s[10]\0\s[0]≪新着メールなし≫\n/
+		メール数合計%(reference[0])通／%(reference[1])byte\n\n[half]/
+		接続先：%(SHIORI3FW.EscapeAllTags(reference[2]))\n\n/
+		■\q[メーラーを開く,OpenMailer]　/
+		■\q[Cancel,CancelOpenMailer]\e"
+	}
+
+}
+
+//メーラーを開く
+OpenMailer {
+	"\C\![open,mailer]\e"
+}
+
+//メーラーを開かない
+CancelOpenMailer {
+	"\1\s[10]\b[-1]\0\s[0]\b[-1]\e"
+}
+
+//メールチェック失敗
+OnBIFFFailure
+{
+	"\1\s[10]\0\s[0]≪メールチェック失敗≫/
+	\n\n[half]失敗理由："
+	--
+	case reference[0] {
+		when 'timeout'			; "応答なし"
+		when 'kick'			; "認証失敗"
+		when 'defect'			; 'メール設定の不備'
+		others				; (SHIORI3FW.EscapeAllTags(reference[0]))
+	}
+	--
+	"\e"
+}
+
+//---------------------------------------------------------
+//ネットワーク更新
+//---------------------------------------------------------
+//ゴーストに限らず追加シェルやバルーンなどのネットワーク更新もここ
+
+//ゴーストネットワーク更新開始
+OnUpdateBegin
+{
+	"\1\s[10]\0\s[0]≪ネットワーク更新開始≫\e"
+}
+
+//ゴースト以外のネットワーク更新開始（ゴーストと共通で良いなら省略可）
+OnUpdateOtherBegin
+{
+	"\1\s[10]\0\s[0]≪"
+	--
+	case reference[3] {
+		when 'shell'			; 'シェル'
+		when 'balloon'			; 'バルーン'
+		when 'headline'			; 'ヘッドライン'
+		when 'plugin'			; 'プラグイン'
+		when 'baseware'			; 'ベースウェア'
+		others				; (SHIORI3FW.EscapeAllTags(reference[3]))
+	}
+	--
+	"『%(SHIORI3FW.EscapeAllTags(reference[0]))』ネットワーク更新開始≫\e"
+}
+
+//ネットワーク更新準備完了
+OnUpdateReady
+{
+	//「On_useorigin1」の設定により0から数えるため+1
+	
+	"\1\s[10]\0\s[0]≪ダウンロードファイル数 計%((TOINT(reference[0])) + 1)個≫\e"
+}
+
+//ネットワーク更新終了
+OnUpdateComplete
+{
+	if reference[0] == "none"
+	{
+		//更新すべきファイルが無かった
+		"\1\s[10]\0\s[0]≪更新ファイルなし≫\e"
+	}
+	else
+	{
+		//実際に更新が完了した
+		"\1\s[10]\0\s[0]≪ネットワーク更新完了≫\e"
+	}
+}
+
+//ネットワーク更新失敗
+OnUpdateFailure
+{
+	"\1\s[10]\0\s[0]≪ネットワーク更新失敗≫\n\n[half]/
+	失敗理由："
+	--
+	case TOSTR(reference[0]) {
+		when 'timeout' , "too slow"	; "タイムアウト"
+		when 'md5 miss'			; "MD5値不一致"
+		when '404'			; "該当ファイルなし"
+		when 'artificial '		; "手動中断"
+		when 'fileio'			; "ディスク容量不足"
+		when 'readonly'			; "ディレクトリ書き込み禁止"
+		others				; (SHIORI3FW.EscapeAllTags(reference[0]))
+	}
+	--
+	"\e"
+}
+
+//ネットワーク更新 ダウンロード開始
+OnUpdate.OnDownloadBegin
+{
+	"\1\s[10]\0\s[0]≪『%(SHIORI3FW.EscapeAllTags(reference[0]))』ダウンロード≫\e"
+}
+
+//更新時間短縮のためMD5値照合トークは省略しています。
+//省略しない場合はコメントアウトを外してください。
+/*
+//ネットワーク更新 MD5値照合開始
+OnUpdate.OnMD5CompareBegin
+{
+	"\1\s[10]\0\s[0]≪MD5値照合開始≫\e"
+}
+
+//ネットワーク更新 MD5値一致
+OnUpdate.OnMD5CompareComplete
+{
+	"\1\s[10]\0\s[0]≪MD5値一致≫\e"
+}
+*/
+
+//ネットワーク更新 MD5値不一致
+OnUpdate.OnMD5CompareFailure
+{
+	"\1\s[10]\0\s[0]≪MD5値不一致≫\e"
+}
+
+//---------------------------------------------------------
+//ヘッドラインセンス
+//---------------------------------------------------------
+
+//ヘッドラインセンス開始
+OnHeadlinesenseBegin
+{
+	"\1\s[10]\0\s[0]≪ヘッドラインセンス『%(SHIORI3FW.EscapeAllTags(reference[0]))』開始≫\e"
+}
+
+//ヘッドライン読み上げ
+OnHeadlinesense.OnFind
+{
+	//\![set,autoscroll,disable] 自動スクロール防止タグ
+	//\![set,choicetimeout,-1] タイムアウトバルーン閉じ防止タグ
+	"\1\s[10]\0\s[0]\b[2]\![set,autoscroll,disable]\![set,choicetimeout,-1]\_q"
+	--
+	//はじめのセリフ
+	if reference[2] == "First" || reference[2] == "First and Last"
+	{
+		//最初のページ
+		"『%(SHIORI3FW.EscapeAllTags(reference[0]))』"
+	}
+	elseif reference[2] == "Next"
+	{
+		//真ん中あたりのページ
+		"『%(SHIORI3FW.EscapeAllTags(reference[0]))』"
+	}
+	elseif reference[2] == "Last"
+	{
+		//最後のページ
+		"『%(SHIORI3FW.EscapeAllTags(reference[0]))』 (Last)"
+	}
+	--
+	//ヘッドライン本体
+	"\_q\n\n[half]%(reference[3])\n"
+	--
+	//選択肢
+	if reference[2] == "First" || reference[2] == "Next"
+	{
+		//次のページがある場合
+		"■\q[Next⇒,]　/
+		■\q[Website,%(reference[1])]　/
+		■\q[Cancel,HeadlineCancel]\e"
+	}
+	else
+	{
+		//次のページがない場合
+		"■\q[Website,%(reference[1])]　/
+		■\q[Cancel,HeadlineCancel]\e"
+	}
+}
+
+//ヘッドラインを終了する
+HeadlineCancel
+{
+	"\1\s[10]\b[-1]\0\s[0]\b[-1]\e"
+}
+
+//ヘッドライン更新が無かった
+OnHeadlinesenseComplete
+{
+	"\1\s[10]\0\s[0]≪ヘッドラインセンス『%(SHIORI3FW.EscapeAllTags(reference[0]))』更新なし≫\e"
+}
+
+//ヘッドラインセンス失敗
+OnHeadlinesenseFailure
+{
+	"\1\s[10]\0\s[0]≪ヘッドラインセンス失敗≫\n\n[half]/
+	失敗理由："
+	--
+	//ヘッドラインの「解析不能」は主にページデザイン変更が原因
+	--
+	if	'download' _in_ reference[0]	; "ファイル取得不可"
+	elseif	'analyze' _in_ reference[0]	; "解析不能"
+	else					; (SHIORI3FW.EscapeAllTags(reference[0]))
+	--
+	--
+	"\e"
+}
+
+//---------------------------------------------------------
+//RSS（SSP/DAE用・省略可）
+//---------------------------------------------------------
+//OnRSSCompleteRSSはヘッドラインと共通で良いと判断し省略
+//（代わりにOnHeadlinesense.OnFindが呼ばれます）
+
+//RSS開始
+//省略するとOnHeadlinesenseBeginが呼ばれる
+OnRSSBegin
+{
+	"\1\s[10]\0\s[0]≪RSS『%(SHIORI3FW.EscapeAllTags(reference[0]))』取得開始≫\e"
+}
+
+//RSS失敗
+//省略するとOnHeadlinesenseFailureが呼ばれる
+OnRSSFailure
+{
+	"\1\s[10]\0\s[0]≪RSS取得失敗≫\n\n[half]/
+	失敗理由："
+	--
+	if	'download' _in_ reference[0]	; "ファイル取得不可"
+	elseif	'analyze' _in_ reference[0]	; "解析不能"
+	else					; (SHIORI3FW.EscapeAllTags(reference[0]))
+	--
+	"\e"
+}
+
+//---------------------------------------------------------
+//ファイル作成
+//---------------------------------------------------------
+
+//updates2.dau作成開始
+OnUpdatedataCreating
+{
+	"\1\s[10]\0\s[0]≪アップデートデータファイル作成開始≫\e"
+}
+
+//updates2.dau作成完了
+OnUpdatedataCreated
+{
+	"\1\s[10]\0\s[0]≪アップデートデータファイル作成完了≫\e"
+}
+
+//NARファイル作成開始
+OnNarCreating
+{
+	"\1\s[10]\0\s[0]≪NARファイル作成開始≫\n\n[half]/
+	//アーカイブ名
+	『%(SHIORI3FW.EscapeAllTags(reference[0]))』\n/
+	//アーカイブパス
+	\_qPath > %(SHIORI3FW.EscapeAllTags(reference[1]))\_q\e"
+}
+
+//NARファイル作成完了
+OnNarCreated
+{
+	"\1\s[10]\0\s[0]≪NARファイル作成完了≫\n\n[half]"
+	--
+	case reference[2] {
+		when 'shell'			; 'シェル'
+		when 'ghost'			; 'ゴースト'
+		when 'balloon'			; 'バルーン'
+		when 'headline'			; 'ヘッドライン'
+		when 'plugin'			; 'プラグイン'
+		when 'supplement'		; 'サプリメント'
+		when 'calendar skin'		; 'カレンダースキン'
+		when 'calendar plugin'		; 'カレンダープラグイン'
+		when 'rss'			; 'RSS'
+		others				; (SHIORI3FW.EscapeAllTags(reference[2]))
+	}
+	--
+	//アーカイブ名
+	"『%(SHIORI3FW.EscapeAllTags(reference[0]))』\n/
+	//アーカイブパス
+	\_qPath > %(SHIORI3FW.EscapeAllTags(reference[1]))\_q\e"
+}
+
+//---------------------------------------------------------
+//時計合わせ
+//---------------------------------------------------------
+
+//時計合わせ開始
+OnSNTPBegin
+{
+	"\1\s[10]\0\s[0]≪時刻チェック開始≫\n\n[half]/
+	接続先：%(SHIORI3FW.EscapeAllTags(reference[2]))\e"
+}
+
+//時刻取得成功、比較開始
+OnSNTPCompare
+{
+	_current = reference[1]
+	_local = reference[2]
+
+	"\1\s[10]\0\s[0]/
+	current %(_current[0])/%(_current[1])/%(_current[2]) %(_current[3]):%(_current[4]):%(_current[5])\w2\n/
+	local   %(_local[0])/%(_local[1])/%(_local[2]) %(_local[3]):%(_local[4]):%(_local[5])\w2\n/
+	\n"
+	--
+	if reference[3] == 0
+	{
+		"≪時刻のずれ：なし≫\e"
+	}
+	else
+	{
+		"≪時刻のずれ：%(reference[3])秒≫\n\n/
+		■\q[時刻を合わせる,OnSNTPEXECUTE]/
+		■\q[合わせない,OnSNTPCANCEL]\e"
+	}
+}
+
+//時計合わせ実行
+//「\6」は時刻合わせタグ
+OnSNTPEXECUTE
+{
+	"\1\s[10]\0\s[0]≪時計合わせ実行≫\6\e"
+}
+
+//時計合わせ中止
+OnSNTPCANCEL
+{
+	"\1\s[10]\0\s[0]≪時計合わせ中止≫\e"
+}
+
+//時計合わせ失敗
+OnSNTPFailure
+{
+	"\1\s[10]\0\s[0]≪時計合わせ失敗≫\e"
+}
+
+//---------------------------------------------------------
+//URLドロップ
+//---------------------------------------------------------
+//CROW でゴーストインストーラからゴーストをインストールを始めた時にも呼ばれます
+
+OnURLDropping
+{
+	"\1\s[10]\0\s[0]≪以下のURLのデータを取得中≫\n\_q%(SHIORI3FW.EscapeAllTags(reference[0]))\_q\e"
+}
+
+//---------------------------------------------------------
+//ファイルドロップ（省略可）
+//---------------------------------------------------------
+
+OnFileDropped
+{
+	//SSPの時のみ画像がドロップされたら壁紙にする
+	//（SSP以外でも壁紙にさせたい時はSAORIを使用）
+	if basewarenameex == "SSP" {
+
+	_split = SPLITPATH(reference[0])
+	_ext = TOLOWER(_split[3])
+
+		if _ext=='.png' || _ext=='.gif' || _ext=='.jpg' || _ext=='.bmp' {
+
+		filepath = reference[0]
+		OnWallPaperDropped
+		}
+	}
+}
+
+//壁紙セット法選択
+//この方式で壁紙変更させる時はOnWallpaperChangeを記述しないように
+//（そちらが優先して実行されてしまうため）
+OnWallPaperDropped
+{
+	"\1\s[10]\0\s[0]≪壁紙の貼り方を選択≫\n\n/
+	■\q[並べて敷き詰める,OnSetWallPaper,%(reference[0]),tile]\n/
+	■\q[画面に合わせて引き伸ばす,OnSetWallPaper,%(reference[0]),stretch]\n/
+	■\q[中央に一つ置く,OnSetWallPaper,%(reference[0]),center]\n/
+	■\q[Cancel,CancelSetWallPaper]\e"
+}
+
+//壁紙をセットしない
+CancelSetWallPaper
+{
+	"\1\s[10]\b[-1]\0\s[0]\b[-1]\e"
+}
+
+//壁紙セット実行
+OnSetWallPaper
+{
+	_split = SPLITPATH(reference[0])
+	_filename = _split[2] + _split[3]
+
+	"\![set,wallpaper,%(reference[0]),%(reference[1])]\1\s[10]\0\s[0]≪壁紙を%(SHIORI3FW.EscapeAllTags(_filename))に変更≫\e"
+}
+

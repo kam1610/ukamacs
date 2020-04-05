@@ -1,0 +1,495 @@
+// -*- coding: sjis-dos; mode: C; -*-
+//******************************************************************************
+// sgcal
+// カレンダー処理用辞書
+// グローバル変数：
+//   CalendarEnables: 0: 無効, 1: 有効
+//******************************************************************************
+
+//////// SgcalRefreshInterval //////////////////////////////////////////////////
+// ネットワーク状態確認のインターバルを返すだけの関数
+SgcalRefreshInterval{ 1; }
+
+//////// ParseCalendarEntries //////////////////////////////////////////////////
+ParseCalendarEntries : void{
+  if (_argc == 0) { return; } // 引数ゼロの場合
+  _lines= SPLIT(_argv[0], "\n");
+  _i= 0;
+  // 要素0か，INT解釈できない場合
+  if ( ISINTSTR(_lines[0]) == 0 || lines[0] == "0") {
+    LOGGING("評価エラー:::%(_lines[0]):::\n");
+    return;
+  }
+  _num= TOINT(_lines[0]); // _num:: EventEntry数
+  _entry_sequence= _lines[1]; // Entryの中で，早い順のTimesを格納
+  // ここで，_entry_sequence[entryIndex,timesIndex:...]の処理
+  _entry_sequence= RE_REPLACE(_entry_sequence, ":$", ""); // 行末の":"を取り除く
+  EntrySequence= SPLIT( _entry_sequence, ":" );
+  _linenum= 2; // 都合，3行目から読み込み開始
+
+  LOGGING("評価するエントリーは%(_num)件です\n");
+  // _i回繰り返し
+  for _i= 0; _i < _num; _i++ {
+    // とりあえずバッファに保存
+    _entry_calendar_uri= _lines[_linenum]; _linenum++;
+    _entry_id          = _lines[_linenum]; _linenum++;
+    _entry_uri         = _lines[_linenum]; _linenum++;
+    _entry_title       = _lines[_linenum]; _linenum++;
+    _entry_content     = _lines[_linenum]; _linenum++;
+    _entry_updated     = _lines[_linenum]; _linenum++;
+    _entry_place       = _lines[_linenum]; _linenum++;
+
+    AddNewCalendarEntry( _entry_calendar_uri, /
+                         _entry_id, /
+                         _entry_uri, /
+                         _entry_title, /
+                         _entry_content, /
+                         _entry_updated, /
+                         _entry_place);
+  }
+}
+
+//////// AddNewCalendarEntry ///////////////////////////////////////////////////
+// 1件のカレンダーエントリーをグローバル変数に追加
+AddNewCalendarEntry : void{
+  _ptr= ARRAYSIZE(EntryCalendarURI);
+  EntryCalendarURI[_ptr]= _argv[0];
+  EntryID[_ptr]         = _argv[1];
+  EntryURI[_ptr]        = _argv[2];
+  EntryTitle[_ptr]      = _argv[3];
+  EntryContent[_ptr]    = _argv[4];
+  EntryUpdated[_ptr]    = _argv[5];
+  EntryPlace[_ptr]      = _argv[6];
+}
+
+///////// RemoveCalendarEntry //////////////////////////////////////////////////
+// カレンダーエントリーを削除
+// _arg[0]: 削除するエントリーの添え字
+// Timesのデータ構造を変更したので，封印
+//RemoveCalendarEntry : void{
+//  _ptr= _arg[0];
+//  // とりあえず一通りの要素を削除
+//  EntrySequence[_ptr]   = IARRAY;
+//  EntryCalendarURI[_ptr]= IARRAY;
+//  EntryID[_ptr]         = IARRAY;
+//  EntryURI[_ptr]        = IARRAY;
+//  EntryTitle[_ptr]      = IARRAY;
+//  EntryContent[_ptr]    = IARRAY;
+//  EntryUpdated[_ptr]    = IARRAY;
+//  EntryPlace[_ptr]      = IARRAY;
+//  // Times配列のポインタ要素を更新
+//  // _ptrへの参照を持つ要素を削除
+//  for _p; _p < ARRAYSIZE(EntryTimes); _p++ {
+//    // EntryTimesをパーズして参照を取り出す
+//    _ref= TOINT( SPLIT(EntryTimes[_p], ",")[0] );
+//    if ( _ref == _ptr ) {
+//      // 削除対象への参照を持つ要素の場合は削除
+//      // _pは1減少させておく
+//      EntryTimes[_p]= IARRAY;
+//      _p--;
+//    } elseif ( _ref > _ptr ) {
+//      // _ptrより大きな値の参照を持つ要素は，参照値を1減少させる
+//      _arybuf= SPLIT(EntryTimes[_p], ",");
+//      _arybuf[0]= TOSTR( _ref - 1 ); // 値の更新
+//      _arybuf= TOSTR(_arybuf); // カンマ区切り文字列に変換
+//    }
+//  }  
+//}
+
+//////// ShowCalendarEntries ///////////////////////////////////////////////////
+// カレンダーエントリーの一覧をとりあえずそのまま表示
+ShowCalendarEntries {
+  _str= "\0\b[3]\s[0]";
+  _str+= TOSTR(EntryCalendarURI) + "\n";
+  _str+= TOSTR(EntryID) + "\n";
+  _str+= TOSTR(EntryURI) + "\n";
+  _str+= TOSTR(EntryTitle) + "\n";
+  _str+= TOSTR(EntryContent) + "\n";
+  _str+= TOSTR(EntryUpdated) + "\n";
+  _str+= TOSTR(EntryPlace) + "\n";
+  _str+= TOSTR(EntryTimes) + "\n";
+  _str+= "\e";
+  _str;
+}
+
+//////// ClearxCalendarEntries //////////////////////////////////////////////////
+// カレンダーエントリーのグローバル変数を初期化
+ClearCalendarEntries : void{
+  /* EntrySequence   = (IARRAY, ""); */
+  /* EntryCalendarURI= (IARRAY, ""); */
+  /* EntryID         = (IARRAY, ""); */
+  /* EntryURI        = (IARRAY, ""); */
+  /* EntryTitle      = (IARRAY, ""); */
+  /* EntryContent    = (IARRAY, ""); */
+  /* EntryUpdated    = (IARRAY, ""); */
+  /* EntryPlace      = (IARRAY, ""); */
+  /* EntryTimes      = (IARRAY, ""); */
+
+  EntrySequence   = IARRAY;
+  EntryCalendarURI= IARRAY;
+  EntryID         = IARRAY;
+  EntryURI        = IARRAY;
+  EntryTitle      = IARRAY;
+  EntryContent    = IARRAY;
+  EntryUpdated    = IARRAY;
+  EntryPlace      = IARRAY;
+  EntryTimes      = IARRAY;
+}
+
+//////// ParseCalendar List ////////////////////////////////////////////////////
+// sgcalから出力されたカレンダーリストをグローバル変数としてパース
+// 行区切りデータで，
+// 1行目はデータ数，以下カレンダータイトル行，URI行の繰り返し
+ParseCalendarList : void{
+  if (_argc == 0) { return; } // 引数ゼロの場合
+  _lines= SPLIT(_argv[0], "\n");
+  _i= 0;
+  // 要素0か，INT解釈できない場合
+  if ( ISINTSTR(_lines[0] == 0) || lines[0] == "0") { return; }
+  // カレンダーリスト用グローバル変数初期化
+  CalendarTitles= (IARRAY,"");
+  CalendarURIs= (IARRAY,"");
+  CalendarEnables= (IARRAY,"");
+  _num= TOINT(_lines[0]);
+  for  _i= 0; _i < _num; _i++  {
+    CalendarTitles[_i]= _lines[_i * 3 + 1];
+    CalendarURIs[_i]=   _lines[_i * 3 + 2];
+    CalendarEnables[_i]= 1; // とりあえず全て有効化
+  }
+}
+
+//////// SelectCalendarList ////////////////////////////////////////////////////
+// カレンダーグローバル変数のトグル動作を行う
+SelectCalendarList{
+  // 保存されているカレンダーリストがない場合
+  if ( CalendarTitles == IARRAY || ARRAYSIZE(CalendarTitles) == 0 ){
+    "\0\s[0]使用できるカレンダーがありません\e";
+    return;
+  }
+  // 引数があって，カレンダーリストの範囲内の場合はトグル動作
+  if ( 0 <= TOINT(_argv[0]) && TOINT(_argv[0]) < ARRAYSIZE(CalendarTitles) ){
+    _i= TOINT(_argv[0]);
+    if ( CalendarEnables[_i] == 0 ){
+      CalendarEnables[_i]= 1;
+    } else {
+      CalendarEnables[_i]= 0;
+    }
+  }
+  // カレンダー選択肢を返す
+  _str= "\![*]";
+  for _i= 0; _i < ARRAYSIZE(CalendarTitles); _i++ {
+    _enables= "[get]  ";
+    if ( CalendarEnables[_i] == 0 ) {
+      _enables= "[pass] ";
+    }    
+    _str+= AYATEMPLATE.MenuItem( _enables + CalendarTitles[_i], "SelectCalendarList(%(_i))");
+  }
+  _str+= AYATEMPLATE.MenuItem("cancel", "Menu_CANCEL");
+  _str+= AYATEMPLATE.MenuItem("戻る", "OpenMenu", 150);
+  _str+= "\e";
+  _str;
+}
+
+//////// RestoreCalendar ///////////////////////////////////////////////////////
+// yayaグローバル変数に保存されたカレンダーデータを
+// sgcalの子プロセスに渡す
+// TODO: 失敗したらそれなりに対処するようにする
+RestoreCalendar : void{
+  // 保存されているカレンダーリストがない場合
+  if ( CalendarTitles == IARRAY || ARRAYSIZE(CalendarTitles) == 0 ){
+    return;
+  }
+  // どうせめったに呼ばれないので，きちんと起動フラグ操作する
+  // 子プロセスが未起動なら起動
+  if sgcal_child_exec == 0 {
+    Call_sgcal("raise_child");
+    sgcal_child_exec= 1;
+  }
+  // 子プロセスのカレンダーリストをクリア
+  Call_sgcal("request", "clear_calendar_list");
+  // カレンダーの枚数分繰り返し
+  for _i= 0; _i < ARRAYSIZE(CalendarTitles); _i++ {
+    Call_sgcal("request", "add_calendar_list", /
+               CalendarTitles[_i], CalendarURIs[_i], CalendarEnables[_i]);
+  }
+}
+
+
+//////// CallSgcal//////////////////////////////////////////////////////////////
+// sspgcを呼び出してパラメータを渡す
+Call_sgcal{
+  if ( _argc > 0 ) {
+    _str= 'FUNCTIONEX("proxy.dll", "sgcal.exe" ';
+    for _i= 0; _i < _argc; _i++{
+      _str+= ", _argv[%(_i)]";
+    }
+    _str+= ")";
+    _result= EVAL(_str);
+    _result;
+  }
+
+  /*
+  if ( _argc == 1 ) {
+    FUNCTIONEX("proxy.dll", "sgcal.exe", _argv[0] );
+  } elseif ( _argc == 2 ) {
+    FUNCTIONEX("proxy.dll", "sgcal.exe", _argv[0], _argv[1] ); 
+  } elseif (_argc > 3 ) {
+    _str= 'FUNCTIONEX("proxy.dll", "sgcal.exe" ';
+    for _i= 0; _i < _argc; _i++{
+      _str+= ", _argv[%(_i)]";
+    }
+    _str+= ");";
+    EVAL(_str);
+  }
+  */
+}
+
+
+//////// SgcalOnSecondChange ///////////////////////////////////////////////////
+// 毎秒呼ばれる，カレンダー処理ループ
+// 
+SgcalOnSecondChange{
+  // calendar_state が100以上ならカレンダーインターバル動作を行う
+  // そうでなければ，何もせずに終了
+  if (calendar_state >= 100) {
+    // 動作中は3秒間隔でステートチェック
+    if (calendar_interval > SgcalRefreshInterval) {
+      // 子プロセスの状態を取得
+      _cstate= FUNCTIONEX("proxy.dll", "sgcal.exe", "request", "state");
+      case calendar_state{
+        when 101{
+          // カレンダーリスト情報を取得済み
+          if (TOINT(_cstate) == 200) {
+            calendar_state= 0; // カレンダー通信終了
+            _result= FUNCTIONEX("proxy.dll", "sgcal.exe", "request", "get_calendar_list");
+            ParseCalendarList( _result );
+            "\0\s[0]カレンダー一覧を更新しました．\n";
+            --
+            str= "";
+            for _i= 0; _i < ARRAYSIZE(CalendarTitles); _i++{
+              str+= "%(_i): %(CalendarTitles[_i])\n";
+            }
+            str;
+          }
+          elseif ( TOINT(_cstate) == 101 ) {
+            // 認証失敗
+            calendar_state= 0;
+            "\0\s[0]認証に失敗しました\e";
+            return;
+          } else {
+            // まだ通信中か，それ以外なら
+            // ステートをしゃべる
+            "\0\s[0]現在の通信状態は%(_cstate)です\e";
+          }
+        }
+        when 102{
+          // エントリー情報取得成功
+          if ( TOINT(_cstate) == 201 ) {
+            calendar_state= 0;
+            _result= Call_sgcal("request", "get_calendar_entries");
+            void ParseCalendarEntries(_result);
+            "\0\s[0]\b[3]エントリー一覧を更新しました．" + _result + "\e";
+            return;
+          } else {
+            "\0\s[0]現在の通信状態は%(_cstate)です\e";
+            return;
+          }
+        }
+        when 103{
+          // リスト・エントリー連続更新実行中
+          // リスト更新ステージ
+          if ( TOINT(_cstate) == 200 ) {
+            _result= Call_sgcal("request", "get_calendar_list");
+            ParseCalendarList( _result ); // カレンダーリスト保存
+            _result= Call_sgcal("request", "refresh_entries"); // エントリー更新
+            // エントリー更新ステージに移行
+            calendar_state= 104;
+          }
+          if ( TOINT(_cstate) == 101 ) { // 認証エラー
+            calendar_state= 0; // カレンダー通信終了
+            "\0\s[0]認証エラーが発生しました．\e";
+            return;
+          }
+          if ( TOINT(_cstate) == 107) { // ネットワークインタフェースエラー
+            calendar_state= 0; // カレンダー通信終了
+            "\0\s[0]ネットワークに接続されていません．．．たぶん\e";
+            return;
+          }
+        }
+        when 104{
+          // リスト・エントリー連続更新実行中
+          // エントリー更新ステージ
+          if ( TOINT(_cstate) == 201) {
+            _result= Call_sgcal("request", "get_calendar_entries");
+            void ParseCalendarEntries(_result);
+            // カレンダー通信終了
+            calendar_state= 0;
+            _result= "\0\s[0]カレンダー更新を完了しました\n"
+            _result+= SgcalShowTodaysEntries() + "\e";
+            _result;
+            return;
+          }
+          if ( TOINT(_cstate) == 101 ){ // 認証エラー
+            calendar_state= 0;
+            "\0\s[0]認証エラーが発生しました．\e";
+            return;
+          }
+          if ( TOINT(_cstate) == 107) { // ネットワークインタフェースエラー
+            calendar_state= 0; // カレンダー通信終了
+            "\0\s[0]ネットワークに接続されていません．．．たぶん\e";
+            return;
+          }
+        }
+      }
+      calendar_interval= 0;
+      return;
+    }
+    calendar_interval++;
+  }
+
+}
+
+
+//////// SgcalOnMinuteChange////////////////////////////////////////////////////
+////  毎分，Timesの各要素を走査
+////  予定のCALENDAR_NOTIFY_BEFOR 分前だったら予定を通知
+SgcalOnMinuteChange {
+  _result= "\0\s[0]";
+  // Timesの各要素について
+  for _i= 1; _i < ARRAYSIZE( EntryTimes ); _i++{
+    // まずTimesの要素をパージング
+    _when= SPLIT( EntryTimes[ _i ], "," );
+    _ref=  TOINT(_when[0]);    // 参照
+    _all_day= _when[1]; // 終日フラグ
+    //if ( _all_day == "True" ){ continue; } // 終日なら時刻通知しない
+    _when[0]= IARRAY; // 参照削除
+    _when[0]= IARRAY; // 終日フラグ削除
+    _when[2],= 0; // 曜日フラグ追加
+    _now= GETTIME();
+    _now[6]= 0; // 秒数カウンタを0にする
+    _time_diff= ( GETSECCOUNT( _when ) - GETSECCOUNT( _now) );
+    // CALENDAR_NOTIFY_BEFORE 分前なら
+    if ( _time_diff ==  CALENDAR_NOTIFY_BEFORE * 60 ){
+    //if ( 1 ) {
+      // 予定の内容をSakuraScriptに整形して出力
+      _result+= /
+        "%(_ref): 予定の%(CALENDAR_NOTIFY_BEFORE)分前になりました．\n" + /
+        "  %(_ref)：\_a[" + EntryURI[_ref] + "]" + /
+        EntryTitle[_ref] + "\_a\n" + /
+        "  内容：" + EntryContent[_ref] + "\n";
+      // ここで使ったTimesを削除
+      // EntryTimes[_i]= IARRAY;
+      //_i--;
+    } elseif ( 1 ) {
+      // ちょうど予定の時間なら
+      
+    }
+  }
+  _result+= "\e";
+  _result;
+}
+
+
+//////// SgcalShowTodaysEntries ////////////////////////////////////////////////
+//// 今日の予定一覧
+//// 返す文字列は\e終端していないので，呼び出し側で適宜整形すること
+SgcalShowTodaysEntries{
+  _result= "";
+  _entries= 0;
+
+  // EntrySequenceの各要素について
+  // (EntrySequenceは開始日順にソートされているとする)
+  for _i= 1; _i < ARRAYSIZE( EntrySequence ); _i++{
+    // まずEntrySequenceの要素を分解
+    // [cf: 旧形式(startTimeのみで，endTimeを含まない)] 
+    //   {<True,2011,08,31,00,00,3>,<False,2011,09,04,23,30,1>,<...>,...}
+    // [cf: 新形式(endTimeを含む)] 
+    //   {<True,2011,08,31,00,00,2011,08,31,10,00,3>,<False,2011,09,04,23,30,2011,09,10,00,00,1>,<...>,...}
+    //     ^^^^ ^^^^^^^^^^^^^^^^ ^^^^^^^^^^^^^^^^ ^
+    //     終日フラグ, 開始日時, 終了日時, 開始日時の昇順インデックス の順
+    // 結果：yyyy,mm,dd,wd,HH,MM
+    _when= SPLIT( EntrySequence[ _i ], ",");
+    _ref= _when[11]; // 参照
+    _all_day= _when[0]; // 終日フラグ
+    _when[11]= IARRAY; // 参照削除
+    _when[0]= IARRAY; // 終日フラグ削除
+    _when[2],= 0;     // 曜日指定フラグを追加 for StartTime
+    _when[8],= 0;     // 曜日指定フラグを追加 for EndTime
+    _startTime= _when[0,5];
+    _endTime= _when[6,11];
+    // 実行日が今日で，かつ現在時刻より後に発生するかどうか
+    // 24時間以内に発生して，日付が同一かどうかチェック
+    // TODO:: もう一つの方針として，"その日"に被る予定を全て表示する．
+    //        この方が一般的(？)な気がする．．というか，見栄えがする．．
+    //        その場合．．開始日時が現在より前で，
+    //        終了日時が現在より後の予定を表示を表示するようにすればよい．
+    //        !! 終了日時が必要 !!
+    if ( (GETSECCOUNT(_startTime) - GETSECCOUNT() > 0 ) && /
+         // 現在より未来の予定
+         (GETSECCOUNT(_startTime) - GETSECCOUNT() < (60 * 60 * 24)) ) { /
+         // 24時間以内
+         // (TOINT(_startTime[2]) == TOINT(GETTIME()[2])) && / // 日付チェック無効中
+                                                          //明日の予定も拾える
+         //(_all_day == "False" ) ) {
+         // ) {
+      _result+= "■ ";
+      if ( (TOINT(_startTime[2]) != TOINT(GETTIME()[2])) ){
+        _result+= "明日の，";
+      }
+      if ( _all_day == "False" ){ // 終日イベントの場合時刻追加
+        _result+= _startTime[4] + ":" + _startTime[5] + " ";
+      }
+      _result+= Entry2SS( _ref );
+      _entries++;
+    } elseif ( (GETSECCOUNT(_startTime) - GETSECCOUNT() <= 0) && /
+               (GETSECCOUNT(_endTime) - GETSECCOUNT() >= 0) ) { /
+      // 開始時刻が過去で，終了時刻が未来の場合
+      _result+= "■ ";
+      _result+= Entry2SS( _ref );
+      _entries++;
+    } elseif ( (_all_day == "True") && (_startTime[2] == GETTIME()[2] )){
+      // 今日の終日イベント
+      _result+= "■ ";
+      _result+= Entry2SS( _ref );
+      _entries++;
+    } else {
+      // デバッグ用
+      //_result+= "--------\n";
+      //_result+= 'GETSECCOUNT: ' + TOSTR(GETSECCOUNT(_startTime) - GETSECCOUNT()) + "\n";
+      //_result+= '_startTime[2]: ' + TOSTR(_startTime[2]) + "\n";
+      //_result+= 'GETTIME()[2]: ' + TOSTR(GETTIME()[2]) + "\n";
+      //_regsult+= Entry2SS( _ref );
+      //_result+= "--------\n";
+    }
+  } // for _i= 1; _i < ARRAYSIZE( EntrySequence ); _i++{
+  
+  if ( _result == "" ) {
+    _result= "\0\s[0]今日は予定がありません．";
+    _result;
+    return;
+  } else {
+    _today= GETTIME();
+    _result= "\0\b[3]\s[0]%(_today[1])月%(_today[2])日，" + /
+             "今日の予定は%(_entries)件です\n" + _result;
+  }
+  //_result+= "\e";
+  _result;
+}
+
+//////// Entry2SS //////////////////////////////////////////////////////////////
+// エントリーへの参照番号を引数にしてSakuraScript表現を返す
+Entry2SS{
+  _ref= TOINT(_argv[0]);
+  _result= "\_a[" + EntryURI[_ref] + "]" + /
+           EntryTitle[_ref] + "\_a\n";
+  _content= CUTSPACE(EntryContent[_ref]);
+  if ( _content != "" ) {
+    _result+= "  " + _content + "\n";
+  }
+  _place= CUTSPACE(EntryPlace[_ref]);
+  if ( _place != "" ) {
+    _result+= "  " + _place + "\n";
+  }
+  _result;
+}
+

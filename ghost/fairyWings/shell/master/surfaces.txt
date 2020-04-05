@@ -1,0 +1,114 @@
+descript{ version,1 }
+
+// 紀子 ////////////////////////////////////////////////////
+surface0{
+animation0.interval,rarely
+animation0.pattern0,base,0, 50, 0, 0
+//animation0.pattern1,overlayfast,102,50,60,78
+animation0.pattern1,overlayfast,102,50,0,0
+//animation0.pattern2,overlayfast,103,50,60,78
+animation0.pattern2,overlayfast,103,50,0,0
+//animation0.pattern3,overlayfast,101,50,60,78
+animation0.pattern3,overlayfast,101,50,0,0
+animation0.pattern4,overlay,0
+}
+
+surface1{
+animation0.interval,rarely
+animation0.pattern0,base,1, 50, 0, 0
+animation0.pattern1,overlayfast,202,50,0,0
+animation0.pattern2,overlayfast,203,50,0,0
+animation0.pattern3,overlayfast,201,50,0,0
+animation0.pattern4,overlay,1
+}
+
+surface2{
+animation0.interval,rarely
+animation0.pattern0,base,2, 50, 0, 0
+animation0.pattern1,overlayfast,302,50,0,0
+animation0.pattern2,overlayfast,303,50,0,0
+animation0.pattern3,overlayfast,301,50,0,0
+animation0.pattern4,overlay,2
+}
+
+surface3{
+}
+
+surface4{
+}
+
+surface5{
+}
+
+surface6{
+}
+
+surface7{
+animation0.interval,rarely
+animation0.pattern0,base,7, 50, 0, 0
+animation0.pattern1,overlayfast,802,50,0,0
+animation0.pattern2,overlayfast,803,50,0,0
+animation0.pattern3,overlayfast,801,50,0,0
+animation0.pattern4,overlay,7
+}
+
+surface8{
+}
+
+surface9{
+}
+
+surface25{
+animation0.interval,rarely
+animation0.pattern0,base,25, 50, 0, 0
+animation0.pattern1,overlayfast,252,50,0,0
+animation0.pattern2,overlayfast,253,50,0,0
+animation0.pattern3,overlayfast,251,50,0,0
+animation0.pattern4,overlay,25
+}
+
+// シルフィ ///////////////////////////////////////////////
+surface10{
+animation0.interval,rarely
+animation0.pattern0,base,10, 50, 0, 0
+animation0.pattern1,overlayfast,1002,50,0,0
+animation0.pattern2,overlayfast,1003,50,0,0
+animation0.pattern3,overlayfast,1001,50,0,0
+animation0.pattern4,overlay,10
+}
+
+surface11{
+animation0.interval,rarely
+animation0.pattern0,base,11, 50, 0, 0
+animation0.pattern1,overlayfast,1101,50,0,0
+animation0.pattern2,overlayfast,1103,50,0,0
+animation0.pattern3,overlayfast,1102,50,0,0
+animation0.pattern4,overlay,11
+}
+
+surface12{
+}
+
+surface13{
+animation0.interval,rarely
+animation0.pattern0,base,13, 50, 0, 0
+animation0.pattern1,overlayfast,1302,50,0,0
+animation0.pattern2,overlayfast,1303,50,0,0
+animation0.pattern3,overlayfast,1301,50,0,0
+animation0.pattern4,overlay,13
+}
+
+surface14{
+}
+
+surface15{
+animation0.interval,rarely
+animation0.pattern0,base,15, 50, 0, 0
+animation0.pattern1,overlayfast,1501,50,0,0
+animation0.pattern2,overlayfast,1503,50,0,0
+animation0.pattern3,overlayfast,1502,50,0,0
+animation0.pattern4,overlay,15
+}
+
+surface16{
+}

@@ -1,0 +1,13 @@
+charset,Shift_JIS
+
+name,のりことシルフィ
+type,ghost
+
+sakura.name,のりこ
+kero.name,シルフィ
+
+sstp.allowunspecifiedsend,1
+
+//icon,icon.ico
+
+shiori,yaya.dll

@@ -1,0 +1,423 @@
+// -*- coding: japanese-shift-jis-dos; mode: C; -*-
+//******************************************************************************
+// YAYA　ゴーストテンプレート
+// メニュー処理辞書
+//******************************************************************************
+
+//******************************************************************************
+//メインメニューの展開
+//
+//AYATEMPLATE.MenuItemの使い方
+//1つめの文字列＝選択肢に表示する文字列
+//2つめの文字列＝選んだときに実行される関数名
+//3つめの文字列＝改行する量　50%刻み　省略すると100%（＝\n）
+//******************************************************************************
+
+//------------------------------------------------------------------------------
+//メインメニュー展開
+//------------------------------------------------------------------------------
+OpenMenu
+{
+	"\0\s[0]\b[3]メニューです";
+	--
+    AYATEMPLATE.MenuItem("ランダムトーク","Menu_AITALK",200);
+	--
+    //if ( STRLEN(AYATEMPLATE.LastTalk) > 0 ) {
+    //  AYATEMPLATE.MenuItem("最近のトーク","Menu_LASTTALK");
+    //}
+	--
+    AYATEMPLATE.MenuItem("しゃべり頻度","Menu_TALKINTERVAL");
+	--
+    //AYATEMPLATE.MenuItem("他のゴーストに話しかける","Menu_GHOSTCOMSTART");
+	--
+    AYATEMPLATE.MenuItem("コミュニケートボックス","Menu_COMMUNICATEOPEN");
+	--
+    //AYATEMPLATE.MenuItem("カレンダーの更新","Menu_REFRESHGOOGLECALENDAR");
+	--
+    //AYATEMPLATE.MenuItem("THREADSAMPLE","Menu_THREADSAMPLE");
+	--
+    //AYATEMPLATE.MenuItem("スレッドの生成","Menu_THREAD_MAKE_THREAD");
+	--
+    //AYATEMPLATE.MenuItem("スレッド状態の取得","Menu_THREAD_STATE2SS");
+	--
+    //AYATEMPLATE.MenuItem("子プロセスを終了","Menu_THREAD_KILL_CHILD");
+	--
+    //AYATEMPLATE.MenuItem("子プロセスと通信テスト", "Menu_COMMUNICATECHILDPROCESS");
+	--
+    //AYATEMPLATE.MenuItem("カレンダーリストの更新", "Menu_REFRESH_CALENDAR_LIST");
+	--
+    //AYATEMPLATE.MenuItem("更新カレンダーの選択", "SelectCalendarList(-1)");
+  --
+    //AYATEMPLATE.MenuItem("引数付き関数呼び出しのテスト_2", "Menu_CALL_FUNCTION_TEST(2)");
+  --
+    //AYATEMPLATE.MenuItem("子プロセスのカレンダーリストのクリア", "Menu_CLEAR_CALENDAR_LIST");
+  --
+    //AYATEMPLATE.MenuItem("子プロセスのカレンダーリストをyayaのカレンダーリストで上書き", "Menu_ADD_CALENDAR_LIST");
+  --
+    //AYATEMPLATE.MenuItem("カレンダーエントリーの更新", "Menu_REFRESH_ENTRIES");
+  --
+    //AYATEMPLATE.MenuItem("カレンダーエントリーのクリア", "Menu_CLEAR_CALENDAR_ENTRIES");
+  --
+    //AYATEMPLATE.MenuItem("カレンダーエントリーの一覧表示", "Menu_SHOW_CALENDAR_ENTRIES");
+  --
+    //AYATEMPLATE.MenuItem("SgcalOnMinuteChangeを実行", "Menu_EXEC_SGCALONMINUTECHANGE");
+  --
+    //AYATEMPLATE.MenuItem("カレンダー更新","Menu_REFRESH_CALENDAR");
+  --
+    //AYATEMPLATE.MenuItem("今日の予定を表示", "Menu_SgcalShowTodaysEntries");
+  --
+    //AYATEMPLATE.MenuItem("idとpassの設定", "Menu_IDPASS_INPUT");
+  --;
+  //AYATEMPLATE.MenuItem("子プロセスの強制終了", "Menu_KILL_CHILD");
+  //AYATEMPLATE.MenuItem("TalkElementTest", "TalkElementTest");
+  //AYATEMPLATE.MenuItem("RTE", "RTE");
+  --;
+  //AYATEMPLATE.MenuItem("UserInput", "UserInput");
+	//スタンプ帳チェック
+	//if AYATEMPLATE.IsPluginExist('379E0DA0-131C-11DD-E1AC-90009E101CFE') {
+	//	AYATEMPLATE.MenuItem("スタンプを押す","Menu_STAMP")
+	//}
+	--;
+  //AYATEMPLATE.MenuItem("UserInput2", "UserInput2");
+  --;
+  AYATEMPLATE.MenuItem("cancel","Menu_CANCEL",150);w
+}
+
+//-- TalkElementTest --
+TalkElementTest{
+  "\0\s[0]返り値は" + TalkElement + "です．\e";
+}
+
+//--RTE
+RTE{
+  RandomTalkEx(1);
+}
+
+//--UserInput
+UserInput{
+  execUserFunction= 1;
+  "\![open,communicatebox]\e";
+}
+
+//--UserInput2
+UserInput2{
+  "\![open,inputbox,OnRTE,-1]\e";
+}
+OnRTE{
+  //"\0\s[1]わはー\e";
+  RandomTalkEx(TOINT(reference[0]));
+}
+
+
+//------------------------------------------------------------------------------
+//メニュー選択タイムアウト
+//------------------------------------------------------------------------------
+OnChoiceTimeout
+{
+	"\0\s[0]タイムアウトしました\e"
+}
+
+
+//******************************************************************************
+//各項目の処理内容
+//******************************************************************************
+
+//---- 何か話して
+Menu_AITALK
+{
+	//---- 明示的にAIトーク開始を指示
+	OnAiTalk
+}
+
+//---- さっきの話は
+Menu_LASTTALK
+{
+	AYATEMPLATE.LastTalk
+}
+
+//---- トーク頻度の調整
+Menu_TALKINTERVAL
+{
+	"\0\s[0]トーク間隔の設定"
+	--
+	AYATEMPLATE.MenuItem("talkmax","Menu_TALKMAX",200)
+	--
+	AYATEMPLATE.MenuItem("normal","Menu_TALKNORMAL")
+	--
+	AYATEMPLATE.MenuItem("poor","Menu_TALKPOOR")
+	--
+	AYATEMPLATE.MenuItem("none","Menu_TALKNONE")
+	--
+	AYATEMPLATE.MenuItem("戻る","OpenMenu",150)
+}
+
+
+//---- ややめに話しかける
+Menu_COMMUNICATEOPEN
+{
+	"\0\s[0]コミュニケートボックスです\![open,communicatebox]\e"
+}
+
+//---- 他のゴーストと話す
+Menu_GHOSTCOMSTART
+{
+	StartCommunicate
+}
+
+//---- キャンセルされた
+Menu_CANCEL
+{
+	"\e"
+}
+
+//---- トーク頻度
+Menu_TALKMAX
+{
+	//---- うるさく話す(15秒間隔)
+	aitalkinterval = 15
+	"\0\s[0]15秒間隔です\e"
+}
+
+Menu_TALKNORMAL
+{
+	//---- ふつうに話す(3分間隔)
+	aitalkinterval = 180
+	"\0\s[0]3分間隔です\e"
+}
+
+Menu_TALKPOOR
+{
+	//---- 静かに話す(5分間隔)
+	aitalkinterval = 300
+	"\0\s[0]5分間隔です\e"
+}
+
+Menu_TALKNONE
+{
+	//---- 話さない
+	aitalkinterval = -1;
+	"\0\s[0]トークをしません\e"
+}
+
+//---- ヘッドライン
+Menu_HEADLINECANCEL
+{
+	//---- キャンセルされた
+	"\0\s[0]ヘッドラインをキャンセルしました\e"
+}
+
+//---- カレンダーの更新
+Menu_REFRESHGOOGLECALENDAR
+{
+  _result= FUNCTIONEX("proxy.dll", "sgcal.exe", "", "")
+  _result
+  //"\0\s[0]ファンクションを実行しました\e"
+}
+
+//---- ThreadSampleプログラムの起動
+Menu_THREADSAMPLE
+{
+  //_result= FUNCTIONEX("proxy.dll", "ProcSample.exe")
+  // プロセスIDが最初の行に帰ってくるので，"\n"で分割
+  //_lines= RE_SPLIT(_result, "\n", 2);
+  //sspgc_id= _lines[0]; // 子プロセスのID
+  //_result[1];
+  // 通信用子プロセス生成
+  //_result= FUNCTIONEX("proxy.dll", "sgcal.exe", "raise_child")
+  _result= Call_sgcal("raise_child");
+  if ( ISINTSTR(_result) == 1 ){
+    SGCAL_PID= _result;
+    "\0\s[0]通信用子プロセスを生成しました．\e";
+  } else {
+    "\0\s[0]通信用子プロセスの生成に失敗しました．\e";
+  }
+}
+
+Menu_THREAD_MAKE_THREAD
+{
+  _result= FUNCTIONEX("proxy.dll", "sgcal.exe", "request", "start_sample_thread");
+  _result;
+}
+
+Menu_THREAD_STATE2SS
+{
+  //_result= FUNCTIONEX("proxy.dll", "sgcal.exe", "request", "state2ss" );
+  _result= Call_sgcal("request", "state2ss");
+  _result;
+}
+
+Menu_COMMUNICATECHILDPROCESS
+{
+  _result= FUNCTIONEX("proxy.dll", "ProcSample.exe", "communicate", sspgc_id);
+
+}
+
+Menu_THREAD_KILL_CHILD
+{
+  _result= FUNCTIONEX("proxy.dll", "sgcal.exe", "request", "kill_child")
+  _result
+}
+//---- カレンダーリストの更新
+Menu_REFRESH_CALENDAR_LIST{
+  // 子プロセスが未起動なら起動
+  SGCAL_PID= Call_sgcal("raise_child");
+  // 起動済みであることを保存．
+  sgcal_child_exec= 1;
+  _result= Call_sgcal("request", "idpass_input");
+  if ( _result == "idpass_input_ok" ) {
+    Call_sgcal("request", "refresh_calendar_list");
+    calendar_state= 101; // 通信待ち状態
+    return;
+  }
+  "\0\s[0]入力キャンセルー\e";
+}
+//---- 引数つき関数呼び出しのテスト
+Menu_CALL_FUNCTION_TEST{
+  "\0\s[0]引数は%(_argv[0])です．\e"
+}
+//---- 子プロセスのカレンダーリストのクリア
+Menu_CLEAR_CALENDAR_LIST{
+  Call_sgcal("request", "clear_calendar_list");
+  "\0\s[0]子プロセスのカレンダーリストをクリアしました\e";
+}
+//---- 子プロセスのカレンダーリストをyayaのカレンダーリストで上書き
+Menu_ADD_CALENDAR_LIST{
+  RestoreCalendar();
+  "\0\s[0]子プロセスのカレンダーリストをyayaのカレンダーリストで上書きしました\e";
+}
+//---- カレンダーエントリーの更新
+Menu_REFRESH_ENTRIES{
+  void Call_sgcal("request", "refresh_entries");
+  calendar_state= 102;
+  "\0\s[0]カレンダーエントリーの更新を開始しました．\e";
+}
+//---- カレンダーエントリーの一覧表示
+Menu_SHOW_CALENDAR_ENTRIES{
+  ShowCalendarEntries();
+}
+//---- カレンダーエントリーのクリア
+Menu_CLEAR_CALENDAR_ENTRIES{
+  ClearCalendarEntries();
+}
+//---- 子プロセスの強制終了
+Menu_KILL_CHILD{
+  Call_sgcal("kill_child", SGCAL_PID);
+}
+//---- SgcalOnMinuteChangeを実行
+Menu_EXEC_SGCALONMINUTECHANGE{
+  SgcalOnMinuteChange();
+}
+//---- idとpassの入力
+Menu_IDPASS_INPUT{
+  SGCAL_PID= Call_sgcal("raise_child");
+  Call_sgcal("request", "idpass_input");
+}
+//---- カレンダー更新
+Menu_REFRESH_CALENDAR{
+  ClearCalendarEntries(); // エントリーをクリア
+  _result= Call_sgcal("raise_child"); // とりあえず子プロセス生成
+                                      // 起動済みならエラーが返ってくるけど放っておく
+  if ( ISINTSTR(_result) == 1 ){
+    SGCAL_PID= _result;
+    // "\0\s[0]通信用子プロセスを生成しました．";
+  } else {
+    // "\0\s[0]通信用子プロセスの生成に失敗しました．";
+  }
+  --
+  _result= Call_sgcal("request", "idpass_state"); // ID,PASSが入力済みかどうか
+  if ( _result == "0" ){
+    _result= Call_sgcal("request", "idpass_input");
+  }
+  if ( _result == "0" ){
+    // idpass入力キャンセル
+    "\e";
+    return;
+  }
+  calendar_state= 103; // カレンダーリスト，エントリー両方更新
+  _null= Call_sgcal("request", "refresh_calendar_list"); // sgcalの出力は捨てる
+
+}
+//---- SgcalShowTodaysEntriesを実行
+Menu_SgcalShowTodaysEntries{
+  SgcalShowTodaysEntries() + "\e";
+}
+
+
+
+//---- スタンプ帳
+Menu_STAMP
+{
+	//初期化
+	SHIORI3FW.RegisterTempVar('StampInfo_IsExist','StampInfo_IsNotify','StampInfo_CurrentStampFile','StampInfo_CurrentStampTitle')
+
+	StampInfo_IsExist = 0
+	StampInfo_IsNotify = 0
+
+	//スタンプ帳情報を取った後、raiseでOnStampMenuExecを発生させて下に処理を移す
+	"\![raiseplugin,379E0DA0-131C-11DD-E1AC-90009E101CFE,OnStampInfoCall]\![raise,OnStampMenuExec]"
+}
+
+OnStampInfo
+{
+	//スタンプあるかどうか？
+	StampInfo_IsExist = reference[1]
+	StampInfo_IsNotify = 1
+	StampInfo_CurrentStampFile = ''
+	StampInfo_CurrentStampTitle = ''
+
+	//押している場合は、どのスタンプを押しているか？
+	_stamparray = SPLIT(reference[3],CHR(2))
+
+	StampInfo_Data = _stamparray
+
+	_n = ARRAYSIZE(_stamparray)
+	for _i = 0 ; _i < _n ; _i++ {
+		_stamp = RE_SPLIT(_stamparray[_i],'[\x1,]') //バイト値1かカンマかでぶった切る：互換モード対策
+
+		//ほかで使う場合はここの名前を変えてね
+		if _stamp[0] == 'シンプルyaya' || _stamp[0] == 'シンプルyaya' {
+			StampInfo_CurrentStampFile = _stamp[1]
+			StampInfo_CurrentStampTitle = _stamp[2]
+			break
+		}
+	}
+}
+
+OnStampMenuExec
+{
+	_stamp_type = ''
+
+	//あった
+	if StampInfo_IsExist {
+		if 'ややめ' _in_ StampInfo_CurrentStampTitle { //マック朗におきかえ
+			"\u\s[10]\h\s[2]もう押してあるのに、\w5まだほしいの？\w9\w9\u\s[11]ならおれのスタンプに置き換えだ！\w9\nどうだうれしいだろ！\w9\w9\h\s[4]\n\nなにやってるの\w5…\w5…"
+
+			_stamp_type = 'マック朗'
+		}
+		else { //ややめに置き換え
+			"\h\s[0]\u\s[10]もうおれのスタンプが押してあるぞ？\w9\w9\h\s[5]とりあえずわたしのに戻すねー。"
+
+			_stamp_type = 'ややめ'
+		}
+	}
+	//ない
+	else {
+		"\0\s[0]スタンプ？\w9\w9\n\s[5]はいどうぞ～。\w9\w9\1\s[11]せっかくだから俺はこのスタンプを選ぶぜ！\w9\w9\0\s[4]えーっと。"
+
+		_stamp_type = 'ややめ'
+	}
+	--
+	if _stamp_type == 'ややめ' {
+		//2行目ファイル、3行目タイトル、4行目コメント
+		"\![raiseplugin,379E0DA0-131C-11DD-E1AC-90009E101CFE,OnStampAdd,/
+		ghost/master/stmp_yym.png,/
+		ややめスタンプ,/
+		紺野ややめが押したスタンプ。服のジッパーの取っ手とデザインが同じ。]"
+	}
+	else {
+		"\![raiseplugin,379E0DA0-131C-11DD-E1AC-90009E101CFE,OnStampAdd,/
+		ghost/master/stmp_mcr.png,/
+		マック朗スタンプ,/
+		マック朗が押したスタンプ。黒林檎。見た目に反して毒はない…と信じたい。]"
+	}
+}
